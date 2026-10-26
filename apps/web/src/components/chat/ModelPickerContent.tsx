@@ -403,6 +403,9 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
   const selectedModelKeySet = new Set(
     selectedModelKeys ?? (activeModelKey ? [activeModelKey] : []),
   );
+  const activeInstanceIds = new Set(
+    props.selectedModels?.map((selection) => selection.instanceId) ?? [props.activeInstanceId],
+  );
   const activeInstanceHasSelectableUnavailableModel =
     activeEntry !== undefined &&
     (modelOptionsByInstance.get(props.activeInstanceId) ?? []).some((option) =>
@@ -839,6 +842,7 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
         {showSidebar && (
           <ModelPickerSidebar
             selectedInstanceId={selectedInstanceId}
+            activeInstanceIds={activeInstanceIds}
             onSelectInstance={handleSelectInstance}
             onFocusSearch={focusSearchInput}
             instanceEntries={sidebarInstanceEntries}

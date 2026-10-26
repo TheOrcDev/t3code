@@ -36,6 +36,7 @@ const PICKER_TOOLTIP_SIDE_OFFSET = 8;
 
 export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
   selectedInstanceId: ProviderInstanceId | "favorites";
+  activeInstanceIds: ReadonlySet<ProviderInstanceId>;
   onSelectInstance: (instanceId: ProviderInstanceId | "favorites") => void;
   onFocusSearch: () => void;
   instanceEntries: ReadonlyArray<ProviderInstanceEntry>;
@@ -139,6 +140,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
             const isDisabled =
               (isUnavailable && !unavailableSelectionIsReachable) || isContextDisabled;
             const isSelected = props.selectedInstanceId === entry.instanceId;
+            const isActive = props.activeInstanceIds.has(entry.instanceId);
             const isHovered = hoveredInstanceId === entry.instanceId;
             const showNewBadge = props.newBadgeInstanceIds?.has(entry.instanceId) ?? false;
             const showInstanceBadge = shouldShowInstanceBadge(entry, props.instanceEntries);
@@ -149,12 +151,15 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                 ? (props.getDisabledInstanceTooltip?.(entry) ?? entry.displayName)
                 : showNewBadge
                   ? `${entry.displayName} (New)`
-                  : entry.displayName;
+                  : isActive
+                    ? `${entry.displayName} (Current)`
+                    : entry.displayName;
 
             const button = (
               <Toolbar.Button
                 className={cn(
                   "relative isolate flex w-full cursor-pointer aspect-square items-center justify-center rounded-md transition-colors hover:bg-foreground/10 focus-visible:bg-foreground/10 focus-visible:outline-none",
+                  isActive && "bg-background shadow-xs ring-1 ring-border",
                   isDisabled && "opacity-50 cursor-not-allowed hover:bg-transparent",
                 )}
                 data-provider-accent-color={entry.accentColor}
@@ -170,6 +175,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                 disabled={isDisabled}
                 focusableWhenDisabled={!isDisabled}
                 aria-pressed={isSelected}
+                aria-current={isActive || undefined}
                 type="button"
                 aria-label={
                   isUnavailable || isContextDisabled
@@ -191,7 +197,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                   indicatorBackground={
                     isHovered && !isDisabled
                       ? "var(--muted)"
-                      : isSelected
+                      : isActive
                         ? "var(--background)"
                         : "color-mix(in oklab, var(--muted) 30%, transparent)"
                   }
